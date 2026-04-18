@@ -130,7 +130,7 @@ end
 local displayFrame = CreateFrame("Frame", "LuraDisplayFrame", UIParent, "BackdropTemplate")
 
 displayFrame:SetSize(300, 200)
-displayFrame:SetPoint("TOP", frame, "BOTTOM", 0, -20)
+displayFrame:SetPoint("CENTER")
 
 displayFrame:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -143,6 +143,13 @@ displayFrame:SetBackdrop({
 
 displayFrame:SetBackdropColor(0, 0, 0, 1)
 displayFrame:Hide()
+
+displayFrame:SetMovable(true)
+displayFrame:EnableMouse(true)
+displayFrame:RegisterForDrag("LeftButton")
+
+displayFrame:SetScript("OnDragStart", displayFrame.StartMoving)
+displayFrame:SetScript("OnDragStop", displayFrame.StopMovingOrSizing)
 
 local icons = {}
 
