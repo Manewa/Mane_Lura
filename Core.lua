@@ -1,6 +1,5 @@
 local clickOrder = {}
 local frame = CreateFrame("Frame", "MonAddonFrame", UIParent, "BackdropTemplate")
-C_ChatInfo.RegisterAddonMessagePrefix("LURA")
 local hideTimer = nil
 
 frame:SetSize(300, 200)
@@ -24,6 +23,12 @@ frame:RegisterForDrag("LeftButton")
 
 frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+local counterText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+counterText:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 10, 10)
+counterText:SetText("0")
+local function UpdateCounter()
+    counterText:SetText(#clickOrder .. " / 5")
+end
 
 local button1 = CreateFrame("Button", nil, frame, "BackdropTemplate")
 
@@ -43,6 +48,7 @@ icon1:SetTexture("Interface/AddOns/Mane_Lura/Icons/TriangleLura.png")
 
 button1:SetScript("OnClick", function()
     table.insert(clickOrder, "Triangle")
+    UpdateCounter()
 end)
 
 local button2 = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -55,6 +61,7 @@ icon2:SetTexture("Interface/AddOns/Mane_Lura/Icons/XLura.png")
 
 button2:SetScript("OnClick", function()
     table.insert(clickOrder, "X")
+    UpdateCounter()
 end)
 
 local button3 = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -67,6 +74,7 @@ icon3:SetTexture("Interface/AddOns/Mane_Lura/Icons/DiamondLura.png")
 
 button3:SetScript("OnClick", function()
     table.insert(clickOrder, "Diamond")
+    UpdateCounter()
 end)
 
 local button4 = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -79,6 +87,7 @@ icon4:SetTexture("Interface/AddOns/Mane_Lura/Icons/TLura.png")
 
 button4:SetScript("OnClick", function()
     table.insert(clickOrder, "T")
+    UpdateCounter()
 end)
 
 local button5 = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -91,6 +100,7 @@ icon5:SetTexture("Interface/AddOns/Mane_Lura/Icons/MoonLura.png")
 
 button5:SetScript("OnClick", function()
     table.insert(clickOrder, "Moon")
+    UpdateCounter()
 end)
 
 local send = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -115,6 +125,8 @@ send:SetScript("OnClick", function()
     HandleSequence(message, UnitName("player"))
 
     clickOrder = {}
+    wipe(clickOrder)
+    UpdateCounter()
 end)
 
 SLASH_LURA1 = "/lura"
@@ -160,9 +172,8 @@ local function HandleSequence(message, sender)
     for _, icon in ipairs(icons) do
         icon:Hide()
     end
-    clickOrder = {}
-
-    displayFrame:Show()
+    wipe(icons)
+    wipe(clickOrder)
 
 -- annule ancien timer
 if hideTimer then
@@ -183,15 +194,19 @@ end)
     {x = -100,  y = 50},  -- 5 (bas droite)
 }
     for value in string.gmatch(message, "([^,]+)") do
-        local tex = displayFrame:CreateTexture(nil, "ARTWORK")
-        tex:SetSize(40, 40)
+        if not icons[i] then
+            icons[i] = displayFrame:CreateTexture(nil, "ARTWORK")
+            icons[i]:SetSize(40, 40)
+        end
+
+        local tex = icons[i]
+        tex:Show()
+
         local pos = positions[i]
+        if pos then
+            tex:SetPoint("CENTER", displayFrame, "CENTER", pos.x, pos.y)
+        end
 
-if pos then
-    tex:SetPoint("CENTER", displayFrame, "CENTER", pos.x, pos.y)
-end
-
-        -- 🔥 mapping icône
         if value == "Triangle" then
             tex:SetTexture("Interface/AddOns/Mane_Lura/Icons/TriangleLura.png")
         elseif value == "X" then
@@ -204,21 +219,17 @@ end
             tex:SetTexture("Interface/AddOns/Mane_Lura/Icons/MoonLura.png")
         end
 
-        table.insert(icons, tex)
         i = i + 1
     end
 end
-
 
 local listener = CreateFrame("Frame")
 
 listener:RegisterEvent("CHAT_MSG_CHANNEL")
 
-listener:SetScript("OnEvent", function(self, event, message, sender, _, _, _, _, _, channelName)
-    if channelName == channelID then
-        if string.sub(message, 1, 5) == "LURA:" then
-            local data = string.sub(message, 6)
-            HandleSequence(data, sender)
-        end
+listener:SetScript("OnEvent", function(self, event, message, sender)
+    if string.sub(message, 1, 5) == "LURA:" then
+        local data = string.sub(message, 6)
+        HandleSequence(data, sender)
     end
 end)
