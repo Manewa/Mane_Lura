@@ -151,7 +151,7 @@ displayFrame:RegisterForDrag("LeftButton")
 displayFrame:SetScript("OnDragStart", displayFrame.StartMoving)
 displayFrame:SetScript("OnDragStop", displayFrame.StopMovingOrSizing)
 
-local icons = {}
+icons = {}
 
 local function HandleSequence(message, sender)
     displayFrame:Show()
@@ -160,7 +160,7 @@ local function HandleSequence(message, sender)
     for _, icon in ipairs(icons) do
         icon:Hide()
     end
-    icons = {}
+    clickOrder = {}
 
     displayFrame:Show()
 
@@ -185,7 +185,6 @@ end)
     for value in string.gmatch(message, "([^,]+)") do
         local tex = displayFrame:CreateTexture(nil, "ARTWORK")
         tex:SetSize(40, 40)
-        -- tex:SetPoint("LEFT", displayFrame, "LEFT", 10 + (i - 1) * 45, 0)
         local pos = positions[i]
 
 if pos then
