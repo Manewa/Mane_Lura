@@ -104,7 +104,7 @@ icon_send:SetTexture("Interface/AddOns/Mane_Lura/Icons/Send.png")
 send:SetScript("OnClick", function()
     local message = table.concat(clickOrder, ",")
 
-    local channelID = GetChannelName("LuraChannel")
+    channelID = GetChannelName("LuraChannel")
 
     if channelID ~= 0 then
     SendChatMessage("LURA:" .. message, "CHANNEL", nil, channelID)
@@ -117,19 +117,6 @@ send:SetScript("OnClick", function()
     clickOrder = {}
 end)
 
-local listener = CreateFrame("Frame")
-
-listener:RegisterEvent("CHAT_MSG_CHANNEL")
-
-listener:SetScript("OnEvent", function(self, event, message, sender, _, _, _, _, _, channelName)
-    if channelName == "LuraChannel" then
-        if string.sub(message, 1, 5) == "LURA:" then
-            local data = string.sub(message, 6)
-            HandleSequence(data, sender)
-        end
-    end
-end)
-
 SLASH_LURA1 = "/lura"
 
 SlashCmdList["LURA"] = function()
@@ -139,34 +126,6 @@ SlashCmdList["LURA"] = function()
         frame:Show()
     end
 end
-
-local listener = CreateFrame("Frame")
-
-listener:RegisterEvent("CHAT_MSG_ADDON")
-
--- listener:SetScript("OnEvent", function(self, event, prefix, message, channel, sender)
---     print("DEBUG RECEPTION:", prefix, message, channel, sender)
-
---     if prefix == "LURA" then
---         print("Reçu LURA :", message)
---     end
--- end)
-
-local function HandleSequence(message, sender)
-    print("Sequence reçue de", sender, ":", message)
-
-    -- 👉 ici tu affiches dans ton UI
-end
-
-local listener = CreateFrame("Frame")
-
-listener:RegisterEvent("CHAT_MSG_ADDON")
-
-listener:SetScript("OnEvent", function(self, event, prefix, message, channel, sender)
-    if prefix == "LURA" then
-        HandleSequence(message, sender)
-    end
-end)
 
 local displayFrame = CreateFrame("Frame", "LuraDisplayFrame", UIParent, "BackdropTemplate")
 
@@ -243,3 +202,17 @@ end
         i = i + 1
     end
 end
+
+
+local listener = CreateFrame("Frame")
+
+listener:RegisterEvent("CHAT_MSG_CHANNEL")
+
+listener:SetScript("OnEvent", function(self, event, message, sender, _, _, _, _, _, channelName)
+    if channelName == channelID then
+        if string.sub(message, 1, 5) == "LURA:" then
+            local data = string.sub(message, 6)
+            HandleSequence(data, sender)
+        end
+    end
+end)
